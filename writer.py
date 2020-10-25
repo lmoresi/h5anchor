@@ -31,8 +31,8 @@ class Writer(H5Manager):
 
         mpi.dowrap(os.makedirs)(path, exist_ok = True)
 
-        from . import builts as builtsmodule
-        self.builtsmodule = builtsmodule
+        from . import frames as framesmodule
+        self.framesmodule = framesmodule
 
     def _process_inp(self, inp):
         global _BUILTTAG_, _CLASSTAG_, _BYTESTAG_, _STRINGTAG_, _EVALTAG_

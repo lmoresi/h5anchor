@@ -11,7 +11,7 @@ H5Manager = disk.H5Manager
 from .fetch import Fetch
 from .scope import Scope
 from .globevars import *
-from .exceptions import *, NotYetImplemented
+from .exceptions import *
 from .array import AnchorArray
 
 class PathNotInFrameError(H5AnchorException, KeyError):

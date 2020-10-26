@@ -2,7 +2,6 @@ import os
 import sys
 import shutil
 import importlib
-import random
 import h5py
 import numpy as np
 import string
@@ -11,6 +10,8 @@ from contextlib import contextmanager
 from functools import wraps
 
 import simpli as mpi
+import reseed
+
 from .exceptions import *
 
 # try:
@@ -81,23 +82,9 @@ def merge(file1, file2):
                 file1.h5file[key] = val[...]
             file1.h5file[key].attrs.update(file2.h5file[key].attrs)
 
-class RandomSeeder:
-    def __init__(self, seed):
-        self.seed = seed
-    def __enter__(self):
-        random.seed(self.seed)
-    def __exit__(self, *args):
-        random.seed()
-
-def random_sleep(base = 0., factor = 1.):
-    with RandomSeeder(time.time()):
-        time.sleep(random.random() * factor + base)
-
 @mpi.dowrap
 def tempname(length = 16, extension = None):
-    letters = string.ascii_lowercase
-    with RandomSeeder(time.time()):
-        name = ''.join(random.choice(letters) for i in range(length))
+    name = reseed.randstring(length)
     if not extension is None:
         name += '.' + extension
     return name
@@ -135,7 +122,7 @@ def lock(filename, password = None):
                     pass
         except FileNotFoundError:
             raise FileNotFoundError("Something went wrong and we don't know what!")
-        random_sleep(0.1, 5.)
+        reseed.randsleep(0.1, 5.)
 @mpi.dowrap
 def release(filename, password = ''):
     lockfilename = filename + '.lock'
@@ -177,7 +164,7 @@ class H5Wrap:
                 self.master = lock(self.lockfilename, self.lockcode)
                 break
             except AccessForbidden:
-                random_sleep(0.1, 5.)
+                reseed.randsleep(0.1, 5.)
         self.opener = self._open_h5file()
         # if self.master:
         #     mpi.message("Logging in at", time.time())
